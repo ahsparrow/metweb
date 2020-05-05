@@ -1,0 +1,105 @@
+<html>
+<head>
+    <title>Weather</title>
+</head>
+
+<body>
+    <div class="chart-container" style="position: relative; width: 80vw">
+        <canvas id="temperatureChart"></canvas>
+    </div>
+    <div class="chart-container" style="position: relative; width: 80vw">
+        <canvas id="windChart"></canvas>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.25.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+
+    <script>
+    var ctx = document.getElementById('temperatureChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Temperature',
+                showLine: true,
+                fill: false,
+                pointRadius: 0,
+                borderColor: 'rgba(0, 0, 255, 0.7)',
+                borderWidth: 2,
+                data: {{ temp|tojson }}
+            }]
+        },
+        options: {
+            responsive: true,
+            aspectRatio: 5,
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        unit: 'hour'
+                    },
+                    ticks: {
+                        max: '{{ midnight }}'
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        labelString: "Temperature (°C)",
+                        display: true
+                    }
+                }]
+            }
+        }
+    });
+
+    var ctx = document.getElementById('windChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Average',
+                showLine: true,
+                fill: false,
+                pointRadius: 0,
+                borderColor: 'rgba(0, 0, 255, 0.7)',
+                borderWidth: 2,
+                data: {{ wind|tojson }}
+            }, {
+                label: 'Gust',
+                showLine: true,
+                fill: false,
+                pointRadius: 0,
+                borderColor: 'rgba(255, 0, 0, 0.3)',
+                borderWidth: 2,
+                data: {{ gust|tojson }}
+            }]
+        },
+        options: {
+            responsive: true,
+            aspectRatio: 4,
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        unit: 'hour'
+                    },
+                    ticks: {
+                        max: '{{ midnight }}'
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        labelString: "Wind (mph)",
+                        display: true
+                    },
+                    ticks: {
+                        min: 0,
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+    </script>
+</body>
+</html>
