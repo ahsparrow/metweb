@@ -1,0 +1,15 @@
+[Unit]
+Description="uWSGI service for metweb"
+After=network.target
+
+[Service]
+User=ahs
+Group=ahs
+RuntimeDirectory=metweb
+WorkingDirectory=/home/ahs/src/metweb
+Environment="METWEB_SETTINGS=/home/ahs/src/metweb/metweb.ini"
+ExecStart=/home/ahs/src/metweb/venv/bin/uwsgi --http 0.0.0.0:8888 --wsgi-file wsgi.py
+
+[Install]
+WantedBy=multi-user.target
+

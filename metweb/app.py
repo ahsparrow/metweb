@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
-import random
+import sqlite3
 
-from flask import Flask, render_template
+from flask import Flask, render_template, current_app
 
 def get_met(dbc, dt):
         like_str = dt.strftime("%Y-%m-%d%%")
@@ -19,30 +19,33 @@ def get_met(dbc, dt):
 
         return wind, gust, temp
 
-def make_index(dbc):
-    def index():
-        dt = datetime.utcnow()
-        midnight = dt.strftime("%Y-%m-%dT24:00:00")
+def index():
+    db_file = current_app.config['DB_FILE']
+    dbc = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES)
 
-        wind_tday, gust_tday, temp_tday = get_met(dbc, dt)
-        wind_yday, gust_yday, temp_yday = get_met(dbc, dt - timedelta(days=1))
+    dt = datetime.utcnow()
+    midnight = dt.strftime("%Y-%m-%dT24:00:00")
 
-        wind = wind_yday + wind_tday
-        gust = gust_yday + gust_tday
-        temp = temp_yday + temp_tday
+    wind_tday, gust_tday, temp_tday = get_met(dbc, dt)
+    wind_yday, gust_yday, temp_yday = get_met(dbc, dt - timedelta(days=1))
 
-        return render_template("index.html",
-                               wind=wind,
-                               gust=gust,
-                               temp=temp,
-                               midnight=midnight)
-    return index
+    dbc.close()
 
-def create_app(dbc):
+    wind = wind_yday + wind_tday
+    gust = gust_yday + gust_tday
+    temp = temp_yday + temp_tday
+
+    return render_template("index.html",
+                           wind=wind,
+                           gust=gust,
+                           temp=temp,
+                           midnight=midnight)
+
+def create_app():
     app = Flask(__name__)
+    app.config.from_envvar("METWEB_SETTINGS")
 
-    app.add_url_rule("/", view_func=make_index(dbc))
-
+    app.add_url_rule("/", view_func=index)
     return app
 
 
